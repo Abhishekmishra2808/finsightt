@@ -1,25 +1,15 @@
 import "dotenv/config";
 import express from "express";
-import cors from "cors";
-import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
-import apiRoutes from "./routes/index";
+import { createApp } from "./app";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
-
-const app = express();
 const PORT = 3000;
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.set("trust proxy", 1);
-app.use(cors());
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-
-app.use("/api", apiRoutes);
+const app = createApp();
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
