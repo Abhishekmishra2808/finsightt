@@ -12,7 +12,7 @@ router.post("/analyze-documents", balanceSheetLimiter, async (req, res) => {
     const contents = [...parts, { text: prompt }];
     const ai = createGeminiClient();
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
+      model: "gemini-3.5-flash",
       contents,
       config: {
         responseMimeType: "application/json",
