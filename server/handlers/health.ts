@@ -1,3 +1,5 @@
+import { analyzeDocuments, analyzeGst } from "../../api/_shared/gemini";
+
 export function handleHealth() {
   return {
     status: 200,
@@ -8,3 +10,5 @@ export function handleHealth() {
     },
   };
 }
+
+export { analyzeDocuments, analyzeGst };

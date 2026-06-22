@@ -1,7 +1,7 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { handleHealth } from "../server/handlers/health";
-
-export default function handler(_req: VercelRequest, res: VercelResponse) {
-  const result = handleHealth();
-  return res.status(result.status).json(result.data);
+export default function handler(_req: any, res: any) {
+  return res.status(200).json({
+    status: "ok",
+    key: process.env.GEMINI_API_KEY ? "PRESENT" : "MISSING",
+    key_first_char: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY[0] : "NONE",
+  });
 }

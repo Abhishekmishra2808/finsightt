@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { checkRateLimit } from "../lib/rateLimit";
+import { checkRateLimit } from "../../api/_shared/rateLimit";
 
 export function expressRateLimit(keyPrefix: string, max: number, windowMs: number, message: string) {
   return (req: Request, res: Response, next: NextFunction) => {
