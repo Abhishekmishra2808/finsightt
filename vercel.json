@@ -3,12 +3,14 @@
   "outputDirectory": "dist",
   "framework": null,
   "functions": {
-    "api/index.ts": {
+    "api/analyze-documents.ts": {
+      "maxDuration": 60
+    },
+    "api/analyze-gst.ts": {
       "maxDuration": 60
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

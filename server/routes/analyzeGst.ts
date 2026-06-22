@@ -1,34 +1,26 @@
 import { Router } from "express";
-import { generalLimiter } from "../middleware/rateLimit";
-import { createGeminiClient } from "../lib/gemini";
+import { expressRateLimit } from "../middleware/expressRateLimit";
+import { handleAnalyzeGst } from "../handlers/analyzeGst";
 
 const router = Router();
 
-router.post("/analyze-gst", generalLimiter, async (req, res) => {
-  try {
-    const { prompt, responseSchema } = req.body;
-    if (!prompt) return res.status(400).json({ error: "Prompt is required" });
-
-    const ai = createGeminiClient();
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseSchema,
-      },
-    });
-
-    if (response.text) {
-      res.json(JSON.parse(response.text));
-    } else {
-      res.status(500).json({ error: "Failed to generate content" });
+router.post(
+  "/analyze-gst",
+  expressRateLimit(
+    "gst",
+    20,
+    15 * 60 * 1000,
+    "Too many requests from this IP, please try again after 15 minutes"
+  ),
+  async (req, res) => {
+    try {
+      const result = await handleAnalyzeGst(req.body);
+      res.status(result.status).json(result.data);
+    } catch (error: any) {
+      console.error("GST proxy error:", error);
+      res.status(500).json({ error: error.message || "Internal server error" });
     }
-  } catch (error: any) {
-    console.error("GST proxy error:", error);
-    res.status(500).json({ error: error.message || "Internal server error" });
   }
-});
+);
 
 export default router;

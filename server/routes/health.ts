@@ -1,13 +1,11 @@
 import { Router } from "express";
+import { handleHealth } from "../handlers/health";
 
 const router = Router();
 
 router.get("/health", (_req, res) => {
-  res.json({
-    status: "ok",
-    key: process.env.GEMINI_API_KEY ? "PRESENT" : "MISSING",
-    key_first_char: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY[0] : "NONE",
-  });
+  const result = handleHealth();
+  res.status(result.status).json(result.data);
 });
 
 export default router;
