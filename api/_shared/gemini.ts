@@ -70,6 +70,7 @@ export async function analyzeDocuments(body: {
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema,
+      thinkingConfig: { thinkingLevel: "minimal" },
     },
   });
 
@@ -88,6 +89,7 @@ export async function analyzeGst(body: { prompt?: string; responseSchema?: unkno
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema,
+      thinkingConfig: { thinkingLevel: "minimal" },
     },
   });
 
