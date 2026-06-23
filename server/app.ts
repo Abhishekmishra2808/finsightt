@@ -8,7 +8,16 @@ export function createApp() {
 
   app.use(helmet({ contentSecurityPolicy: false }));
   app.set("trust proxy", 1);
-  app.use(cors());
+
+  const allowedOrigin = process.env.ALLOWED_ORIGIN;
+  app.use(
+    cors(
+      allowedOrigin
+        ? { origin: allowedOrigin.split(",").map((o) => o.trim()) }
+        : undefined
+    )
+  );
+
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
   app.use("/api", apiRoutes);

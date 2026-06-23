@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Building2, MapPin, Calendar, FileText, AlertCircle, CheckCircle2, Loader2, Package } from 'lucide-react';
 import { motion } from 'motion/react';
+import { apiUrl } from '@/lib/api';
 
 declare global {
   interface Window {
@@ -110,7 +111,7 @@ export default function GstSearch() {
         required: ["legalName", "tradeName", "status", "taxpayerType", "registrationDate", "address", "stateJurisdiction", "natureOfBusiness", "goodsAndServices", "hsnSacCodes", "promoters", "filingHistory"]
       };
 
-      const proxyRes = await fetch('/api/analyze-gst', {
+      const proxyRes = await fetch(apiUrl('/api/analyze-gst'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, responseSchema })

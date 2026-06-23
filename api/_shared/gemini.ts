@@ -7,13 +7,7 @@ function toGeminiContents(parts: unknown[], prompt: string) {
     if (!part || typeof part !== "object") continue;
 
     if ("inlineData" in part) {
-      const inline = (part as { inlineData: { data: string; mimeType: string } }).inlineData;
-      geminiParts.push({
-        inline_data: {
-          mime_type: inline.mimeType,
-          data: inline.data,
-        },
-      });
+      geminiParts.push({ inlineData: (part as { inlineData: { data: string; mimeType: string } }).inlineData });
       continue;
     }
 
@@ -24,6 +18,15 @@ function toGeminiContents(parts: unknown[], prompt: string) {
 
   geminiParts.push({ text: prompt });
   return [{ role: "user", parts: geminiParts }];
+}
+
+function parseGeminiError(errorText: string): string {
+  try {
+    const parsed = JSON.parse(errorText);
+    return parsed?.error?.message || errorText;
+  } catch {
+    return errorText;
+  }
 }
 
 async function callGemini(model: string, body: Record<string, unknown>) {
@@ -39,11 +42,12 @@ async function callGemini(model: string, body: Record<string, unknown>) {
       "x-goog-api-key": apiKey,
     },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(55_000),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || `Gemini API request failed (${response.status})`);
+    throw new Error(parseGeminiError(errorText) || `Gemini API request failed (${response.status})`);
   }
 
   const data = await response.json();

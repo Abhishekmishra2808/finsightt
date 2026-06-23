@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Upload, FileImage, FileText, FileSpreadsheet, Loader2, AlertCircle, TrendingUp, DollarSign, Activity, PieChart, CheckCircle, AlertTriangle, XCircle, Info, BarChart3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as XLSX from 'xlsx';
+import { compressImageIfNeeded } from '@/lib/compressImage';
+import { apiUrl } from '@/lib/api';
 
 declare global {
   interface Window {
@@ -136,7 +138,6 @@ interface ProcessedOutput {
   projections: string;
 }
 
-
 export default function Analyzer() {
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -185,8 +186,10 @@ export default function Analyzer() {
     setError(null);
 
     try {
+      const preparedFiles = await Promise.all(files.map((file) => compressImageIfNeeded(file)));
+
       const parts = await Promise.all(
-        files.map(async (file) => {
+        preparedFiles.map(async (file) => {
           if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data);
@@ -305,10 +308,18 @@ export default function Analyzer() {
         required: ["extractedData", "projections"]
       };
 
-      const proxyRes = await fetch('/api/analyze-documents', {
+      const requestBody = { parts, prompt, responseSchema };
+      const payload = JSON.stringify(requestBody);
+      if (payload.length > 4 * 1024 * 1024) {
+        throw new Error(
+          "Upload is too large for the cloud server (max ~4 MB). Try a smaller image, or run locally with npm run dev."
+        );
+      }
+
+      const proxyRes = await fetch(apiUrl('/api/analyze-documents'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parts, prompt, responseSchema })
+        body: payload
       });
 
       if (!proxyRes.ok) {
