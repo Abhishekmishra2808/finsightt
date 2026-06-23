@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: finsight-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npx tsx server/standalone.ts
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: https://finsightt-seven.vercel.app

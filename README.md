@@ -39,30 +39,36 @@ src/        React frontend (Vite + Tailwind)
 | `npm start` | Run production build |
 | `npm run lint` | TypeScript check |
 
-## Deploy on Vercel
+## Deploy (production)
 
-1. Push your code to GitHub (already done: `Abhishekmishra2808/finsightt`).
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import your `finsightt` repo.
-3. Vercel auto-detects settings from `vercel.json`. Confirm:
-   - **Build Command:** `vite build`
-   - **Output Directory:** `dist`
-4. Add **Environment Variables** in Vercel project settings:
+Vercel alone cannot run balance sheet analysis reliably (10s timeout on Hobby, ~4.5 MB body limit). Use **Vercel for the frontend** + **Render for the API** (free, no trial expiry).
 
-   | Variable | Notes |
-   |----------|-------|
-   | `GEMINI_API_KEY` | Your Gemini API key |
-   | `VITE_SUPABASE_URL` | Supabase project URL |
-   | `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
+### 1. Deploy API on Render (free)
 
-5. Click **Deploy**.
+1. Go to [render.com](https://render.com) → sign in with GitHub
+2. **New +** → **Blueprint** → connect repo `finsightt`
+3. Render reads `render.yaml` automatically
+4. Add secret **`GEMINI_API_KEY`** when prompted
+5. Deploy → copy your URL (e.g. `https://finsight-api.onrender.com`)
+6. Test: `https://YOUR-RENDER-URL/api/health` → `"key": "PRESENT"`
 
-### Vercel limits to know
+> First request after idle may take ~30s (free tier spins down). After that it's fast.
 
-- **Request body:** ~4.5 MB max on serverless — large balance sheet uploads may fail; keep files smaller or use a VPS/Railway for heavy uploads.
-- **Function timeout:** Gemini calls can take 30–60s; `vercel.json` sets `maxDuration: 60` (requires Vercel Pro for 60s; Hobby plan is 10s).
-- **Rate limiting:** In-memory rate limits reset per serverless instance; still helps but is less strict than a single server.
+### 2. Deploy frontend on Vercel
 
-### After deploy
+1. [vercel.com](https://vercel.com) → import `finsightt` repo
+2. Build: `vite build` · Output: `dist`
+3. **Environment Variables:**
 
-- Visit your Vercel URL (e.g. `https://finsightt.vercel.app`)
-- Test API: `https://your-url.vercel.app/api/health` → should show `"key": "PRESENT"`
+   | Variable | Value |
+   |----------|--------|
+   | `VITE_API_BASE_URL` | `https://YOUR-RENDER-URL` (no trailing slash) |
+   | `VITE_SUPABASE_URL` | your Supabase URL |
+   | `VITE_SUPABASE_ANON_KEY` | your Supabase anon key |
+
+4. Deploy → open your Vercel URL and test balance sheet upload
+
+### Local dev
+
+No `VITE_API_BASE_URL` needed — `npm run dev` uses `/api` on localhost automatically.
+
